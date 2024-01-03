@@ -48,6 +48,7 @@ export default function LoginCard() {
 			}
 			localStorage.setItem("user-threads", JSON.stringify(data));
 			setUser(data);
+
 		} catch (error) {
 			showToast("Error", error, "error");
 		} finally {
