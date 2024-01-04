@@ -9,15 +9,15 @@ import { formatDistanceToNow } from "date-fns";
 import { DeleteIcon } from "@chakra-ui/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
-// import postsAtom from "../atoms/postsAtom";
+import PostsAtom from "../atoms/PostsAtom";
 
-const Post = ({ post, postedBy }) => {
+
+const Post = ({ post, postedBy}) => {
 	const [user, setUser] = useState(null);
 	const showToast = useShowToast();
 	const currentUser = useRecoilValue(userAtom);
-	const [posts, setPosts] = useState([])
 	const navigate = useNavigate();
-	console.log(post.replies)
+	const [posts,setPosts]= useRecoilState(PostsAtom);
 	useEffect(() => {
 		const getUser = async () => {
 			try {
@@ -52,8 +52,9 @@ const Post = ({ post, postedBy }) => {
 				return;
 			}
 			showToast("Success", "Post deleted", "success");
+			setPosts(posts.filter((p)=> p._id !== post._id));
 			
-			setPosts(posts.filter((p) => p._id !== post._id));
+
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		}
@@ -146,7 +147,7 @@ const Post = ({ post, postedBy }) => {
 					)}
 
 					<Flex gap={3} my={1}>
-						<Actions post={post} />
+						<Actions post={post}  />
 					</Flex>
 				</Flex>
 			</Flex>

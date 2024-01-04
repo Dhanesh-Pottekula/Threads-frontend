@@ -16,21 +16,25 @@ import useGetUserProfile from "../hooks/useGetUserProfile";
 import useShowToast from "../hooks/useShowToast";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { DeleteIcon } from "@chakra-ui/icons";
+import PostsAtom from "../atoms/PostsAtom";
 
 const PostPage = () => {
   const { user, loading } = useGetUserProfile();
-  const [post, setPost] = useState(null);
+	const [posts, setPosts] = useRecoilState(PostsAtom);
+
+
   const showToast = useShowToast();
   const { pid } = useParams();
   const currentUser = useRecoilValue(userAtom);
   const navigate= useNavigate()
 
-
+  const currentPost= posts[0]
   useEffect(() => {
     const getPost = async () => {
+      setPosts([])
       try {
         const res = await fetch(`/api/posts/${pid}`);
         const data = await res.json();
@@ -39,20 +43,20 @@ const PostPage = () => {
           return;
         }
         console.log(data);
-        setPost(data);
+        setPosts([data]);
       } catch (error) {
         showToast("error", error, "error");
       }
     };
     getPost();
-  }, [showToast, pid]);
+  }, [showToast, pid,setPosts]);
 
   const handleDeletePost = async () => {
     try {
 
       if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-      const res = await fetch(`/api/posts/${post._id}`, {
+      const res = await fetch(`/api/posts/${currentPost._id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -75,7 +79,7 @@ const PostPage = () => {
       </Flex>
     );
   }
-  if (!post) return null;
+  if (!currentPost) return null;
 
   return (
     <>
@@ -96,7 +100,7 @@ const PostPage = () => {
             textAlign={"right"}
             color={"gray.light"}
           >
-            {formatDistanceToNow(new Date(post.createdAt))} ago
+            {formatDistanceToNow(new Date(currentPost.createdAt))} ago
           </Text>
 
           {currentUser?._id === user._id && (
@@ -105,21 +109,21 @@ const PostPage = () => {
         </Flex>
       </Flex>
       <Flex>
-        <Text my={3}>{post.text}</Text>
+        <Text my={3}>{currentPost.text}</Text>
       </Flex>
-      {post.img && (
+      {currentPost.img && (
         <Box
           borderRadius={6}
           overflow={"hidden"}
           border={"1px solid"}
           borderColor={"gray.light"}
         >
-          <Image src={post.img} w={"full"}></Image>
+          <Image src={currentPost.img} w={"full"}></Image>
         </Box>
       )}
 
       <Flex gap={3} my={3}>
-        <Actions post={post} />
+        <Actions post={currentPost} />
       </Flex>
     
 
@@ -137,10 +141,13 @@ const PostPage = () => {
       <Divider my={4}></Divider>
 
 
-        {post.replies.map((reply)=>{
-         return <Comment key={reply._id}  reply={reply} lastReply={reply._id === post.replies[post.replies.length - 1]._id}/>
-
-        })}
+      {currentPost.replies.map((reply) => (
+				<Comment
+					key={reply._id}
+					reply={reply}
+					lastReply={reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
+				/>
+			))}
     </>
   );
 };

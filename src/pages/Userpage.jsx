@@ -6,12 +6,14 @@ import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
 import useGetUserProfile from "../hooks/useGetUserProfile";
+import { useRecoilState } from "recoil";
+import PostsAtom from "../atoms/PostsAtom";
 function Userpage() {
   const {user,loading}=useGetUserProfile()
   const { username } = useParams();
   const showToast = useShowToast();
 
-  const [posts, setposts] = useState([]);
+  const [posts, setPosts] = useRecoilState(PostsAtom)
   const [fetchingPosts, setFetchingPosts] = useState(true);
 
   useEffect(() => {
@@ -22,10 +24,10 @@ function Userpage() {
         const res = await fetch(`/api/posts/user/${username}`);
         const data = await res.json();
         console.log(data);
-        setposts(data);
+        setPosts(data);
       } catch (error) {
         showToast("error", error, "error");
-        setposts([]);
+        setPosts([]);
       } finally {
         setFetchingPosts(false);
       }
@@ -33,8 +35,8 @@ function Userpage() {
 
 
     getPosts();
-  }, [username, showToast]);
-
+  }, [username, showToast,setPosts]);
+console.log(posts)
   if (!user && loading) {
     return (
       <Flex justifyContent={"center"}>
@@ -56,7 +58,7 @@ function Userpage() {
         </Flex>
       )}
       {posts.map((post)=>{
-        return <Post key={post._id} post={post} postedBy={post.postedBy}/>
+        return <Post key={post._id} post={post} postedBy={post.postedBy} />
       })}
     </>
   );

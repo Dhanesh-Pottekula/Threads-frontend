@@ -22,9 +22,11 @@ import {
 import {BsFillImageFill} from 'react-icons/bs'
 import { useRef, useState } from "react";
 import usePreviewImg from "../hooks/usePreviewImg";
-import {useRecoilValue} from 'recoil';
+import {useRecoilState, useRecoilValue} from 'recoil';
 import userAtom from '../atoms/userAtom'
 import useShowToast from "../hooks/useShowToast";
+import PostsAtom from "../atoms/PostsAtom";
+import { useParams } from "react-router-dom";
 
 
 function CreatePost() {
@@ -36,6 +38,9 @@ function CreatePost() {
   const user = useRecoilValue(userAtom)
   const showToast = useShowToast()
   const [loading,setLoading]=useState(false)
+  const [posts,setPosts]=useRecoilState(PostsAtom);
+  const {username} = useParams()
+
 
   const handleTextChange = (e) => {
     const inputtext=e.target.value
@@ -69,6 +74,9 @@ function CreatePost() {
       return
     }
     showToast('success','post created successfully ','success')
+    if (username === user.username){
+      setPosts([data,...posts])
+    }
     onClose()
     setPostText('')
     setImgUrl('')
@@ -138,7 +146,7 @@ function CreatePost() {
             <Button colorScheme="blue" mr={3} onClick={handleCreatePost} isLoading={loading}>
               Post
             </Button>
-            <Button variant="ghost">Secondary Action</Button>
+
           </ModalFooter>
         </ModalContent>
       </Modal>
