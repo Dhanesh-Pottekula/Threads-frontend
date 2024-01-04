@@ -15,9 +15,9 @@ const Post = ({ post, postedBy }) => {
 	const [user, setUser] = useState(null);
 	const showToast = useShowToast();
 	const currentUser = useRecoilValue(userAtom);
-	// const [posts, setPosts] = useState([])
+	const [posts, setPosts] = useState([])
 	const navigate = useNavigate();
-
+	console.log(post.replies)
 	useEffect(() => {
 		const getUser = async () => {
 			try {
@@ -28,6 +28,7 @@ const Post = ({ post, postedBy }) => {
 					return;
 				}
 				setUser(data);
+				
 			} catch (error) {
 				showToast("Error", error.message, "error");
 				setUser(null);
@@ -51,10 +52,12 @@ const Post = ({ post, postedBy }) => {
 				return;
 			}
 			showToast("Success", "Post deleted", "success");
-			// setPosts(posts.filter((p) => p._id !== post._id));
+			
+			setPosts(posts.filter((p) => p._id !== post._id));
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		}
+
 	};
 
 	if (!user) return null;
